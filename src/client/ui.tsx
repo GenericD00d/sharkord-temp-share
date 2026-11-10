@@ -13,6 +13,7 @@ import {
   type ChangeEvent,
   type CSSProperties,
 } from "react";
+import { Button, Input, Popover, PopoverContent, PopoverTrigger } from "@sharkord/ui";
 import manifest from "../../manifest.json";
 import { formatSize, formatTimeLeft } from "../rules";
 import type { TPlugin, TShareCard, TShareListItem } from "../types";
@@ -21,42 +22,25 @@ const PLUGIN_ID = manifest.id;
 const callAction = createCallAction<TPlugin>();
 const linkPath = (token: string) => `/plugins/${PLUGIN_ID}/d/${token}`;
 
-const buttonStyle: CSSProperties = {
-  padding: "6px 12px",
-  borderRadius: "var(--radius)",
-  background: "var(--primary)",
-  color: "var(--primary-foreground)",
-  cursor: "pointer",
-};
-const subtleButtonStyle: CSSProperties = {
-  ...buttonStyle,
-  background: "transparent",
-  color: "var(--foreground)",
-  border: "1px solid var(--border)",
-};
-const inputStyle: CSSProperties = {
-  width: 70,
-  padding: "4px 8px",
-  borderRadius: "var(--radius)",
-  border: "1px solid var(--border)",
-  background: "transparent",
-  color: "var(--foreground)",
-};
-const panelStyle: CSSProperties = {
-  position: "absolute",
-  bottom: "calc(100% + 8px)",
-  right: 0,
-  zIndex: 50,
-  display: "grid",
-  gap: 10,
-  width: 280,
-  padding: 12,
-  borderRadius: "var(--radius)",
-  border: "1px solid var(--border)",
-  background: "var(--popover, var(--background))",
-  color: "var(--foreground)",
-  boxShadow: "0 8px 24px rgba(0,0,0,.25)",
-};
+// lucide's file-clock, drawn inline to match the host's lucide icons without
+// bundling the whole icon set; the host Button sizes it like the paperclip
+const FileClockIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="h-4 w-4"
+  >
+    <path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3" />
+    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+    <circle cx="8" cy="16" r="6" />
+    <path d="M9.5 17.5 8 16.25V14" />
+  </svg>
+);
 const mutedStyle: CSSProperties = { color: "var(--muted-foreground)", fontSize: 12 };
 
 const uploadFile = async (
@@ -114,7 +98,11 @@ const ShareButton = memo(({ channelId }: { channelId: number }) => {
   const [progress, setProgress] = useState<number>();
   const [error, setError] = useState<string>();
 
-  const toggle = useCallback(() => setOpen((value) => !value), []);
+  // keep the panel open while uploading, closing it would hide the progress
+  const onOpenChange = useCallback(
+    (next: boolean) => setOpen((value) => (next || progress === undefined ? next : value)),
+    [progress],
+  );
   const onFile = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const [picked] = event.target.files ?? [];
 
@@ -150,33 +138,32 @@ const ShareButton = memo(({ channelId }: { channelId: number }) => {
   const busy = progress !== undefined;
 
   return (
-    <div style={{ position: "relative" }}>
-      <button type="button" title="Share a large file temporarily" onClick={toggle}>
-        📦
-      </button>
-
-      {open && (
-        <div style={panelStyle}>
-          <strong>Temporary file share</strong>
-          <input type="file" onChange={onFile} disabled={busy} />
-          <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            Expires after
-            <input style={inputStyle} type="number" min={1} value={hours} onChange={onHours} disabled={busy} />
-            hours
-          </label>
-          <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            Max
-            <input style={inputStyle} type="number" min={1} value={downloads} onChange={onDownloads} disabled={busy} />
-            downloads
-          </label>
-          {busy && <progress value={progress} max={1} style={{ width: "100%" }} />}
-          {error && <span style={{ color: "var(--destructive)", fontSize: 13 }}>{error}</span>}
-          <button type="button" style={buttonStyle} onClick={onShare} disabled={!file || busy}>
-            {busy ? `Uploading ${Math.round((progress ?? 0) * 100)}%` : "Share"}
-          </button>
-        </div>
-      )}
-    </div>
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>
+        <Button size="icon" variant="ghost" title="Share a large file temporarily">
+          <FileClockIcon />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent side="top" align="end" className="grid gap-3">
+        <strong>Temporary file share</strong>
+        <Input type="file" onChange={onFile} disabled={busy} />
+        <label className="flex items-center gap-2 text-sm">
+          Expires after
+          <Input className="w-20" type="number" min={1} value={hours} onChange={onHours} disabled={busy} />
+          hours
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          Max
+          <Input className="w-20" type="number" min={1} value={downloads} onChange={onDownloads} disabled={busy} />
+          downloads
+        </label>
+        {busy && <progress value={progress} max={1} style={{ width: "100%" }} />}
+        {error && <span className="text-sm text-destructive">{error}</span>}
+        <Button onClick={onShare} disabled={!file || busy}>
+          {busy ? `Uploading ${Math.round((progress ?? 0) * 100)}%` : "Share"}
+        </Button>
+      </PopoverContent>
+    </Popover>
   );
 });
 
@@ -198,18 +185,18 @@ const ShareCard = memo(({ props }: TPluginMessageComponentProps) => {
     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginTop: 4 }}>
       {share.downloadsLeft > 0 && (
         <form method="post" action={linkPath(share.token)} style={{ margin: 0 }}>
-          <button type="submit" style={buttonStyle}>
+          <Button type="submit" size="sm">
             Download
-          </button>
+          </Button>
         </form>
       )}
-      <button type="button" style={subtleButtonStyle} onClick={onCopy}>
+      <Button type="button" size="sm" variant="outline" onClick={onCopy}>
         {copied ? "Copied" : "Copy link"}
-      </button>
+      </Button>
       {share.uploaderId === ownUserId && (
-        <button type="button" style={subtleButtonStyle} onClick={onDelete}>
+        <Button type="button" size="sm" variant="outline" onClick={onDelete}>
           Delete
-        </button>
+        </Button>
       )}
       <span style={mutedStyle}>
         {share.downloadsLeft} download(s) left · expires in {formatTimeLeft(share.expiresAt, Date.now())}
@@ -228,9 +215,9 @@ const AdminRow = memo(({ share, onDelete }: { share: TShareListItem; onDelete: (
       <td>{share.ready ? formatTimeLeft(share.expiresAt, Date.now()) : "uploading"}</td>
       <td>{share.downloadsLeft}</td>
       <td>
-        <button type="button" style={subtleButtonStyle} onClick={onClick}>
+        <Button type="button" size="sm" variant="outline" onClick={onClick}>
           Delete
-        </button>
+        </Button>
       </td>
     </tr>
   );
