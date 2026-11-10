@@ -1,14 +1,14 @@
-<p align="center"><img src="logo.png" alt="Temp Share logo" width="160"></p>
+<p align="center"><img src="logo.png" alt="Shiver Temp Share logo" width="160"></p>
 
-# Temp Share (Sharkord plugin)
+# Shiver Temp Share (Sharkord plugin)
 
 Share big files with a link that dies after N hours or N downloads.
 
-- 📦 button in the chat composer: pick a file, lifetime and max downloads. Uploads go in 50 MB chunks (safe behind Cloudflare/nginx limits) and retry on failure.
+- File-with-clock button next to the emoji and paperclip buttons: pick a file, lifetime and max downloads. Uploads go in 50 MB chunks (safe behind Cloudflare/nginx limits) and retry on failure.
 - The plugin posts a card in the channel with Download / Copy link / Delete and a live "downloads left" count.
 - The copied link opens a small page with a Download button. Only the button press counts as a download, so link previews and scanners don't use any up.
 - Pressing Download uses one download and hands the browser a private link that supports pausing and resuming (HTTP range requests) for 6 hours, so a dropped or resumed download doesn't cost another use.
-- Normal chat attachments over the **Redirect attachments over (MB)** size (default 25, 0 = off) are refused with a message pointing people to the 📦 button.
+- Normal chat attachments over the **Redirect attachments over (MB)** size (default 25, 0 = off) are refused with a message pointing people to that button.
 
 ## Keeping storage under control
 

@@ -1,10 +1,9 @@
 {
   "id": "temp-share",
-  "name": "Temp Share",
+  "name": "Shiver Temp Share",
   "author": "GenericD00d",
   "description": "Share large files with links that expire after a set time or number of downloads.",
   "homepage": "https://github.com/GenericD00d/sharkord-temp-share",
-  "logo": "https://raw.githubusercontent.com/GenericD00d/sharkord-temp-share/main/logo-256.png",
   "sdkVersion": 2,
   "version": "0.0.2"
 }

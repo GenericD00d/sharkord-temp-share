@@ -75,7 +75,7 @@ const onLoad = async (ctx: PluginContext<TPlugin>) => {
       key: "oversizedMb",
       name: "Redirect attachments over (MB)",
       description:
-        "Normal chat attachments bigger than this are refused with a hint to use the 📦 Temp Share button. 0 turns it off.",
+        "Normal chat attachments bigger than this are refused with a hint to use the Shiver Temp Share button. 0 turns it off.",
       type: "number",
       defaultValue: 25,
     },
@@ -201,7 +201,7 @@ const onLoad = async (ctx: PluginContext<TPlugin>) => {
     if (type !== FileSaveType.MESSAGE || oversizedMb <= 0 || size <= oversizedMb * MB) return;
 
     return {
-      reject: `Attachments over ${oversizedMb} MB are not allowed. Use the 📦 Temp Share button next to the message box to share it with an expiring link.`,
+      reject: `Attachments over ${oversizedMb} MB are not allowed. Use the Shiver Temp Share button next to the message box to share it with an expiring link.`,
     };
   });
 

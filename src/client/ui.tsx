@@ -23,7 +23,7 @@ const callAction = createCallAction<TPlugin>();
 const linkPath = (token: string) => `/plugins/${PLUGIN_ID}/d/${token}`;
 
 // lucide's file-clock, drawn inline to match the host's lucide icons without
-// bundling the whole icon set; the host Button sizes it like the paperclip
+// bundling the whole icon set, sized like the Shiver Media Player button
 const FileClockIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -33,7 +33,9 @@ const FileClockIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="h-4 w-4"
+    width="20"
+    height="20"
+    aria-hidden
   >
     <path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3" />
     <path d="M14 2v4a2 2 0 0 0 2 2h4" />
@@ -140,7 +142,7 @@ const ShareButton = memo(({ channelId }: { channelId: number }) => {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <Button size="icon" variant="ghost" title="Share a large file temporarily">
+        <Button size="icon" variant="ghost" aria-label="Share a large file" title="Share a large file temporarily">
           <FileClockIcon />
         </Button>
       </PopoverTrigger>
