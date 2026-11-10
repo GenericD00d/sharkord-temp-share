@@ -37,3 +37,7 @@ bun test src       # rules tests
 ```
 
 If you're behind a reverse proxy, make sure it allows request bodies of at least 50 MB (nginx: `client_max_body_size 60m;`).
+
+## License
+
+MIT, see [LICENSE](LICENSE).
