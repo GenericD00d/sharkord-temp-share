@@ -1,3 +1,5 @@
+<p align="center"><img src="logo.png" alt="Temp Share logo" width="160"></p>
+
 # Temp Share (Sharkord plugin)
 
 Share big files with a link that dies after N hours or N downloads.
