@@ -1,0 +1,10 @@
+{
+  "id": "temp-share",
+  "name": "Temp Share",
+  "author": "GenericD00d",
+  "description": "Share large files with links that expire after a set time or number of downloads.",
+  "homepage": "https://github.com/GenericD00d/sharkord-temp-share",
+  "logo": "https://placehold.co/100x100/white/black",
+  "sdkVersion": 2,
+  "version": "0.0.1"
+}
