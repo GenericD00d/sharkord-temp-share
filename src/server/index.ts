@@ -64,10 +64,18 @@ const isInt = (value: unknown, min: number, max: number) =>
 const onLoad = async (ctx: PluginContext<TPlugin>) => {
   const settings = await ctx.settings.register([
     {
+      key: "limitToChannel",
+      name: "Only show in the file sharing channel",
+      description:
+        "Turn off to show the share button in every channel. Sharkord's channel picker cannot be cleared, so this is the way back to every channel.",
+      type: "boolean",
+      defaultValue: true,
+    },
+    {
       key: "shareChannelId",
       name: "File sharing channel",
       description:
-        "Only show the share button in this channel, to keep other chat bars uncluttered. Leave empty for every channel.",
+        "Only show the share button in this channel, to keep other chat bars uncluttered. Empty or switched off above means every channel.",
       type: "channel",
       defaultValue: 0,
     },
@@ -106,6 +114,10 @@ const onLoad = async (ctx: PluginContext<TPlugin>) => {
       defaultValue: 100,
     },
   ] as const);
+
+  // 0 means every channel
+  const shareChannel = () =>
+    settings.get("limitToChannel") ? settings.get("shareChannelId") : 0;
 
   const dir = path.join(ctx.dataPath, "files");
   const filePath = (token: string) => path.join(dir, token);
@@ -208,7 +220,7 @@ const onLoad = async (ctx: PluginContext<TPlugin>) => {
 
     if (type !== FileSaveType.MESSAGE || oversizedMb <= 0 || size <= oversizedMb * MB) return;
 
-    const shareChannelId = settings.get("shareChannelId");
+    const shareChannelId = shareChannel();
     const channel = shareChannelId ? await ctx.channels.get(shareChannelId) : undefined;
     const where = channel ? ` in #${channel.name}` : " next to the message box";
 
@@ -219,12 +231,20 @@ const onLoad = async (ctx: PluginContext<TPlugin>) => {
 
   ctx.actions.register({
     name: "config",
-    executes: async () => ({ shareChannelId: settings.get("shareChannelId") }),
+    executes: async () => ({ shareChannelId: shareChannel() }),
   });
 
   // move the button in every open client as soon as an admin changes the channel
   ctx.events.on("setting:set", ({ key }) => {
-    if (key === "shareChannelId") ctx.push.toAll({ shareChannelId: settings.get("shareChannelId") });
+    if (key === "shareChannelId" || key === "limitToChannel") ctx.push.toAll({ shareChannelId: shareChannel() });
+  });
+
+  // a deleted sharing channel would otherwise hide the button everywhere
+  ctx.events.on("channel:deleted", ({ channelId }) => {
+    if (settings.get("shareChannelId") !== channelId) return;
+
+    settings.set("shareChannelId", 0);
+    ctx.push.toAll({ shareChannelId: shareChannel() });
   });
 
   ctx.actions.register({
@@ -234,7 +254,7 @@ const onLoad = async (ctx: PluginContext<TPlugin>) => {
       const name = cleanName(String(payload.name ?? ""));
       const { channelId, size, hours, downloads } = payload;
 
-      const shareChannelId = settings.get("shareChannelId");
+      const shareChannelId = shareChannel();
 
       if (shareChannelId && channelId !== shareChannelId) {
         throw new Error("Files can only be shared in the file sharing channel.");
