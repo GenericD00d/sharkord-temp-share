@@ -5,6 +5,7 @@
 Share big files with a link that dies after N hours or N downloads.
 
 - File-with-clock button next to the emoji and paperclip buttons: pick a file, lifetime and max downloads. Uploads go in 50 MB chunks (safe behind Cloudflare/nginx limits) and retry on failure.
+- Set **File sharing channel** to show the button only in that channel and keep other chat bars uncluttered. Leave it empty to show it everywhere. Changes apply to everyone right away, no reload needed.
 - The plugin posts a card in the channel with Download / Copy link / Delete and a live "downloads left" count.
 - The copied link opens a small page with a Download button. Only the button press counts as a download, so link previews and scanners don't use any up.
 - Pressing Download uses one download and hands the browser a private link that supports pausing and resuming (HTTP range requests) for 6 hours, so a dropped or resumed download doesn't cost another use.
@@ -23,6 +24,7 @@ Files live in the plugin's `dataPath/files`. Uninstalling the plugin removes the
 
 | Setting | Default |
 |---|---|
+| File sharing channel | empty (every channel) |
 | Total storage limit (MB) | 20480 |
 | Redirect attachments over (MB) | 25 |
 | Max file size (MB) | 4096 |

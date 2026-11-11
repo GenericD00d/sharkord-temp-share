@@ -1,6 +1,7 @@
 import {
   actions,
   createCallAction,
+  usePush,
   useStoreSelector,
   type TPluginMessageComponentProps,
 } from "@sharkord/plugin-sdk/client";
@@ -16,7 +17,7 @@ import {
 import { Button, Input, Popover, PopoverContent, PopoverTrigger } from "@sharkord/ui";
 import manifest from "../../manifest.json";
 import { formatSize, formatTimeLeft } from "../rules";
-import type { TPlugin, TShareCard, TShareListItem } from "../types";
+import type { TPlugin, TShareCard, TShareConfig, TShareListItem } from "../types";
 
 const PLUGIN_ID = manifest.id;
 const callAction = createCallAction<TPlugin>();
@@ -91,6 +92,31 @@ const uploadFile = async (
     throw error;
   }
 };
+
+// fetched once per page load and kept current by pushes, so switching channels
+// costs no request
+let configRequest: Promise<TShareConfig> | undefined;
+
+const ShareSlot = memo(({ channelId }: { channelId: number }) => {
+  const [shareChannelId, setShareChannelId] = useState<number>();
+
+  useEffect(() => {
+    configRequest ??= callAction("config", {});
+    configRequest.then((config) => setShareChannelId(config.shareChannelId)).catch(() => {
+      configRequest = undefined;
+    });
+  }, []);
+
+  usePush<TPlugin>((config) => {
+    configRequest = Promise.resolve(config);
+    setShareChannelId(config.shareChannelId);
+  });
+
+  if (shareChannelId === undefined) return null;
+  if (shareChannelId !== 0 && shareChannelId !== channelId) return null;
+
+  return <ShareButton channelId={channelId} />;
+});
 
 const ShareButton = memo(({ channelId }: { channelId: number }) => {
   const [open, setOpen] = useState(false);
@@ -282,4 +308,4 @@ const AdminTab = memo(() => {
   );
 });
 
-export { AdminTab, ShareButton, ShareCard };
+export { AdminTab, ShareCard, ShareSlot };

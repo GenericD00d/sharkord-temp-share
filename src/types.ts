@@ -29,7 +29,11 @@ type TShareCard = Pick<
 
 type TShareListItem = TShareCard & { channelId: number; ready: boolean };
 
+/** 0 means every channel */
+type TShareConfig = { shareChannelId: number };
+
 type TPlugin = {
+  push: TShareConfig;
   actions: {
     start: {
       payload: {
@@ -42,6 +46,7 @@ type TPlugin = {
       response: { token: string; chunkBytes: number };
     };
     delete: { payload: { token: string }; response: void };
+    config: { payload: Record<string, never>; response: TShareConfig };
     list: {
       payload: Record<string, never>;
       response: {
@@ -53,4 +58,4 @@ type TPlugin = {
   };
 };
 
-export type { TPlugin, TShare, TShareCard, TShareListItem };
+export type { TPlugin, TShare, TShareCard, TShareConfig, TShareListItem };

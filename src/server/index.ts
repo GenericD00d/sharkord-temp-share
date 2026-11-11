@@ -64,6 +64,14 @@ const isInt = (value: unknown, min: number, max: number) =>
 const onLoad = async (ctx: PluginContext<TPlugin>) => {
   const settings = await ctx.settings.register([
     {
+      key: "shareChannelId",
+      name: "File sharing channel",
+      description:
+        "Only show the share button in this channel, to keep other chat bars uncluttered. Leave empty for every channel.",
+      type: "channel",
+      defaultValue: 0,
+    },
+    {
       key: "storageLimitMb",
       name: "Total storage limit (MB)",
       description:
@@ -200,9 +208,23 @@ const onLoad = async (ctx: PluginContext<TPlugin>) => {
 
     if (type !== FileSaveType.MESSAGE || oversizedMb <= 0 || size <= oversizedMb * MB) return;
 
+    const shareChannelId = settings.get("shareChannelId");
+    const channel = shareChannelId ? await ctx.channels.get(shareChannelId) : undefined;
+    const where = channel ? ` in #${channel.name}` : " next to the message box";
+
     return {
-      reject: `Attachments over ${oversizedMb} MB are not allowed. Use the Shiver Temp Share button next to the message box to share it with an expiring link.`,
+      reject: `Attachments over ${oversizedMb} MB are not allowed. Use the Shiver Temp Share button${where} to share it with an expiring link.`,
     };
+  });
+
+  ctx.actions.register({
+    name: "config",
+    executes: async () => ({ shareChannelId: settings.get("shareChannelId") }),
+  });
+
+  // move the button in every open client as soon as an admin changes the channel
+  ctx.events.on("setting:set", ({ key }) => {
+    if (key === "shareChannelId") ctx.push.toAll({ shareChannelId: settings.get("shareChannelId") });
   });
 
   ctx.actions.register({
@@ -212,6 +234,11 @@ const onLoad = async (ctx: PluginContext<TPlugin>) => {
       const name = cleanName(String(payload.name ?? ""));
       const { channelId, size, hours, downloads } = payload;
 
+      const shareChannelId = settings.get("shareChannelId");
+
+      if (shareChannelId && channelId !== shareChannelId) {
+        throw new Error("Files can only be shared in the file sharing channel.");
+      }
       if (!name) throw new Error("The file needs a name.");
       if (!isInt(size, 1, settings.get("maxFileMb") * MB)) {
         throw new Error(`Files can be at most ${settings.get("maxFileMb")} MB.`);

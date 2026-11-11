@@ -4,10 +4,10 @@ import type {
   TPluginMessageComponentsMap,
   TPluginTabs,
 } from "@sharkord/plugin-sdk/client";
-import { AdminTab, ShareButton, ShareCard } from "./ui";
+import { AdminTab, ShareCard, ShareSlot } from "./ui";
 
 const components: TPluginComponentsMapBySlotId = {
-  [PluginSlot.CHAT_ACTIONS]: [ShareButton],
+  [PluginSlot.CHAT_ACTIONS]: [ShareSlot],
 };
 
 const messageComponents: TPluginMessageComponentsMap = {
