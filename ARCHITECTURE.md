@@ -47,7 +47,7 @@ manifest.json         the plugin's id, version and SDK version
     is;
   - sweeps every minute: expired, used-up and stale shares go, and files no share owns are removed.
 - **`src/rules.ts`**: `canDownload`, `isExpired`, `isStale`, `isUsedUp`, `isTicketValid`,
-  `parseRange`, `usedBytes`, `cleanName`, `formatSize`, `formatTimeLeft`, and the constants
+  `parseRange`, `usedBytes`, `usedBytesBy`, `pendingBy`, `cleanName`, `formatSize`, `formatTimeLeft`, and the constants
   `CHUNK_BYTES` (50 MB), `RESUME_WINDOW_MS` (6 hours) and `MB`.
 - **`src/client/ui.tsx`**: `ShareSlot` (the button and its form, uploading in chunks with retries),
   `ShareCard` (Download, Copy link, Delete, and the live downloads-left count), and `AdminTab`
@@ -57,8 +57,9 @@ manifest.json         the plugin's id, version and SDK version
 
 ### Uploading
 
-1. `start` checks the permissions, the channel, the size, the lifetime and the download count, and
-   that the share fits under the storage limit, counting unfinished uploads at their full size.
+1. `start` checks the permissions, the channel, the size, the lifetime and the download count; that
+   the share fits under the storage limit and the member's own limit, counting unfinished uploads at
+   their full size; and that the member hasn't too many unfinished uploads already.
 2. It saves the share and creates an empty file named by a new token.
 3. The client sends 50 MB chunks to `/chunk/<token>?offset=<bytes so far>`. Only the uploader's,
    only at the expected offset, one at a time, each capped at what's left.
@@ -84,7 +85,7 @@ lapsed, or after an hour without progress on an unfinished upload, and deletes i
   `config` with the sharing channel; `list` with usage and every share.
 - **Routes**, under `/plugins/temp-share/`: `/chunk/<token>`, `/d/<token>`, `/f/<token>/<ticket>`.
 - **The message component** `share`, whose props are a `TShareCard`.
-- **Settings**: `limitToChannel`, `shareChannelId`, `storageLimitMb`, `oversizedMb`, `maxFileMb`,
-  `maxHours`, `maxDownloads`.
+- **Settings**: `limitToChannel`, `shareChannelId`, `storageLimitMb`, `memberLimitMb`,
+  `maxPendingUploads`, `oversizedMb`, `maxFileMb`, `maxHours`, `maxDownloads`.
 - **Releases**: `temp-share-<version>.tar.gz` and `<version>.json`, plugin id `temp-share`,
   plugin SDK 2. See [docs/standards.md](docs/standards.md#contracts-between-the-repos).

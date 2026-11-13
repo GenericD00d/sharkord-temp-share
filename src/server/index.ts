@@ -24,8 +24,10 @@ import {
   isUsedUp,
   MB,
   parseRange,
+  pendingBy,
   RESUME_WINDOW_MS,
   usedBytes,
+  usedBytesBy,
 } from "../rules";
 import type { TPlugin, TShare, TShareCard } from "../types";
 
@@ -86,6 +88,22 @@ const onLoad = async (ctx: PluginContext<TPlugin>) => {
         "New uploads are refused once shared files would go over this. Files in progress count at their full size.",
       type: "number",
       defaultValue: 20480,
+    },
+    {
+      key: "memberLimitMb",
+      name: "Storage limit per member (MB)",
+      description:
+        "How much one member's shares may take at once, so no one member can fill the total. 0 means only the total applies.",
+      type: "number",
+      defaultValue: 5120,
+    },
+    {
+      key: "maxPendingUploads",
+      name: "Unfinished uploads per member",
+      description:
+        "How many uploads one member may have in progress at once. Each holds its full size until it finishes or is abandoned.",
+      type: "number",
+      defaultValue: 3,
     },
     {
       key: "oversizedMb",
@@ -284,6 +302,19 @@ const onLoad = async (ctx: PluginContext<TPlugin>) => {
         throw new Error(
           `Not enough shared storage left (${formatSize(Math.max(0, limit - used))} free). Delete old shares or ask an admin.`,
         );
+      }
+
+      // one member can't take the whole limit, nor hold it with uploads they never finish
+      const memberLimit = settings.get("memberLimitMb") * MB;
+      const mine = usedBytesBy(shares.values(), invoker.userId);
+
+      if (memberLimit > 0 && mine + size > memberLimit) {
+        throw new Error(
+          `You can share at most ${formatSize(memberLimit)} at once (${formatSize(Math.max(0, memberLimit - mine))} left). Delete one of your shares first.`,
+        );
+      }
+      if (pendingBy(shares.values(), invoker.userId) >= Math.max(1, settings.get("maxPendingUploads"))) {
+        throw new Error("Finish or delete one of your unfinished uploads first.");
       }
 
       const token = randomBytes(18).toString("base64url");

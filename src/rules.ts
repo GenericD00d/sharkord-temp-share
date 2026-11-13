@@ -40,6 +40,8 @@ const parseRange = (header: string | undefined, size: number) => {
     end = size - 1;
   } else {
     start = Number(match[1]);
+    // a last byte before the first is an invalid range, which RFC 9110 says to ignore
+    if (match[2] && Number(match[2]) < start) return undefined;
     end = match[2] ? Math.min(Number(match[2]), size - 1) : size - 1;
   }
 
@@ -63,9 +65,38 @@ const usedBytes = (shares: Iterable<TShare>) => {
   return total;
 };
 
-// the name only ever reaches a header and html, never the filesystem
+// one member's part of usedBytes, so no one member can take the whole storage limit
+const usedBytesBy = (shares: Iterable<TShare>, uploaderId: number) => {
+  let total = 0;
+
+  for (const share of shares) if (share.uploaderId === uploaderId) total += share.size;
+
+  return total;
+};
+
+// one member's unfinished uploads, each holding its full size until it completes or goes stale
+const pendingBy = (shares: Iterable<TShare>, uploaderId: number) => {
+  let count = 0;
+
+  for (const share of shares) if (share.uploaderId === uploaderId && !share.ready) count += 1;
+
+  return count;
+};
+
+// marks that are invisible or change the reading direction, which can make one file type read as
+// another; they are dropped
+const INVISIBLE = /[\xad\u061c\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]/g;
+// controls (C0, DEL, C1, line and paragraph separators), path separators and quotes
+const UNSAFE = /[\x00-\x1f\x7f-\x9f\u2028\u2029\\/"]/g;
+// a surrogate without its partner, which can't go into a header
+const LONE_SURROGATE = /\p{Cs}/gu;
+
+// the name only ever reaches a header and html, never the filesystem. The cap counts characters,
+// not UTF-16 units, so it never splits an emoji in two
 const cleanName = (name: string) =>
-  name.replace(/[\x00-\x1f\\/"]/g, "_").trim().slice(0, 200);
+  Array.from(name.replace(INVISIBLE, "").replace(LONE_SURROGATE, "_").replace(UNSAFE, "_").trim())
+    .slice(0, 200)
+    .join("");
 
 const formatSize = (bytes: number) => {
   if (bytes >= 1024 * MB) return `${(bytes / 1024 / MB).toFixed(1)} GB`;
@@ -95,6 +126,8 @@ export {
   isUsedUp,
   MB,
   parseRange,
+  pendingBy,
   RESUME_WINDOW_MS,
   usedBytes,
+  usedBytesBy,
 };

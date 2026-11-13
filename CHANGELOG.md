@@ -4,6 +4,17 @@ Entries up to 0.0.5 were reconstructed from the commit history on 2026-11-13.
 
 ## Unreleased
 
+### Security
+
+- A storage limit per member (default 5 GB) and a cap on each member's unfinished uploads
+  (default 3), so no one member can fill the total.
+- File names lose invisible and direction-changing marks, so a file's type reads as it is, and are
+  capped by character, so a name never breaks the download header.
+
+### Fixed
+
+- A range whose last byte comes before its first is ignored, as RFC 9110 says, instead of refused.
+
 ### Changed
 
 - The repo is now `shiver-temp-share`; the plugin id stays `temp-share`, so existing shares carry

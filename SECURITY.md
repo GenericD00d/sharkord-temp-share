@@ -30,8 +30,8 @@ enforce each line, and their tests, are in [AGENTS.md](AGENTS.md#rules-that-must
 | Untrusted | Where it comes in | What guards it |
 |---|---|---|
 | Anyone on the internet | `/d/<token>` and `/f/<token>/<ticket>` | 144-bit tokens and 96-bit tickets; files served only as `attachment`, `application/octet-stream` and `nosniff`; the page escapes the name under a CSP that allows nothing but its own form |
-| Members uploading | The `start` action and `/chunk/<token>` | `UPLOAD_FILES` and the right to post in the channel; only the uploader's chunks, in order, capped; size, lifetime and download limits; the storage limit |
-| File names members give | The card, the page and the download's name | Control characters, slashes and quotes replaced, and the name capped; escaped in HTML; encoded in the header |
+| Members uploading | The `start` action and `/chunk/<token>` | `UPLOAD_FILES` and the right to post in the channel; only the uploader's chunks, in order, capped; size, lifetime and download limits; the total storage limit, a per-member limit, and a cap on each member's unfinished uploads |
+| File names members give | The card, the page and the download's name | Control characters, slashes and quotes replaced; invisible and direction-changing marks dropped; capped by character; escaped in HTML; encoded in the header |
 | Members deleting | The `delete` action | The uploader, or `MANAGE_STORAGE` |
 | Range requests | `/f/*` | Clamped to the file |
 
@@ -58,8 +58,9 @@ enforce each line, and their tests, are in [AGENTS.md](AGENTS.md#rules-that-must
 - **Unfinished uploads count at their full size**, so uploads in parallel can't overshoot the
   storage limit.
 - **Shares live in memory**, so a download is spent before anything can interleave.
-- **Not yet in place:** a per-member share of the storage limit, and removing bidi and invisible
-  characters from names. This branch adds both.
+- **Each member has a share of the storage limit**, and a cap on unfinished uploads, so one member
+  can't fill the total or hold it with uploads they never finish.
+- **Names lose invisible and direction-changing marks**, so a file's type reads as it is.
 
 ## Review history
 

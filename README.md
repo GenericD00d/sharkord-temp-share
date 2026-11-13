@@ -41,6 +41,8 @@ Set **File sharing channel** to show the button only in that channel and keep ot
 | Only show in the file sharing channel | on |
 | File sharing channel | empty (every channel) |
 | Total storage limit (MB) | 20480 |
+| Storage limit per member (MB) | 5120 (0 = only the total) |
+| Unfinished uploads per member | 3 |
 | Redirect attachments over (MB) | 25 |
 | Max file size (MB) | 4096 |
 | Max lifetime (hours) | 168 |
@@ -49,6 +51,7 @@ Set **File sharing channel** to show the button only in that channel and keep ot
 ## Keeping storage under control
 
 - **Storage limit** setting (default 20 GB): uploads are refused once shared files would exceed it. Uploads still in progress count at their full size.
+- **Per member** (default 5 GB, and 3 unfinished uploads at once), so no one member can fill the total.
 - Files are deleted when they expire, are deleted by the uploader, or when the chat message is deleted. A file that runs out of downloads is kept until the last download's 6-hour resume window closes (or the file expires, whichever is first), then deleted.
 - Admins (`MANAGE_STORAGE`) get a **Shared files** tab in the plugin settings showing usage and a Delete button for every file.
 - Abandoned uploads are cleaned up after 1 hour with no progress. Files on disk that the plugin no longer tracks are removed every minute.
@@ -58,7 +61,6 @@ Files live in the plugin's `dataPath/files`. Uninstalling the plugin removes the
 ## Known limitations
 
 - Anyone holding a link can use it until it runs out; there is no per-person access.
-- The storage limit is shared by everyone on the server.
 
 ## Building
 

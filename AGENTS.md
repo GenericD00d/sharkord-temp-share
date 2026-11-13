@@ -70,7 +70,8 @@ SECURITY.md explains why each one matters.
 | Only the uploader or someone with `MANAGE_STORAGE` deletes a share; only `MANAGE_STORAGE` lists them | `delete`, `list` | Review |
 | A download is spent before any await, so two presses can't both use the last one | the `/d/*` POST route, `canDownload` | `src/rules.test.ts` |
 | Ranges are clamped to the file | `parseRange` in `src/rules.ts` | `src/rules.test.ts` |
-| File names lose control characters, slashes and quotes, and are capped | `cleanName` in `src/rules.ts` | `src/rules.test.ts` |
+| File names lose control characters, slashes, quotes, and invisible and direction-changing marks, and are capped by character | `cleanName` in `src/rules.ts` | `src/rules.test.ts` |
+| No member's shares, or unfinished uploads, go over their own limit | `start`, `usedBytesBy` and `pendingBy` in `src/rules.ts` | `src/rules.test.ts` |
 
 ## Conventions
 

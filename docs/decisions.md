@@ -41,11 +41,22 @@ the same files, checks and security baseline ([standards.md](standards.md)). The
 **Consequences:** the plugin id stays `temp-share`, because Sharkord keys a plugin's stored data by
 its id, and the release asset names stay `temp-share-<version>.tar.gz`.
 
-## Open items
+## 2026-11-13: A per-member limit as well as the total
 
-- **A per-member share of the storage limit**, so one member can't hold all of it. See SECURITY.md.
-- **Bidi and invisible characters in names** aren't removed yet. See SECURITY.md.
+**Why:** with only a total, one member could fill it, or hold it with uploads they never finish.
+
+**Consequences:** `memberLimitMb` (default 5 GB) and `maxPendingUploads` (default 3), checked in `start`. Setting the member limit to 0 leaves only the total.
 
 ## Bug log
 
-No bugs recorded yet.
+### One member could hold the whole storage limit (fixed)
+
+Unfinished uploads count at their full size, so a member could reserve the total and keep it with a trickle of data. Fixed with a per-member limit and a cap on unfinished uploads. Found by the 2026-11-13 review.
+
+### Direction marks in names could disguise a file's type (fixed)
+
+`cleanName` now drops invisible and direction-changing marks, and caps names by character, so it never splits an emoji into a surrogate a header can't carry. Found by the 2026-11-13 review.
+
+### An invalid range was refused (fixed)
+
+A range whose last byte comes before its first is now ignored, as RFC 9110 says, instead of answered with 416. Found by the 2026-11-13 review.
