@@ -5,5 +5,5 @@
   "description": "Share large files with links that expire after a set time or number of downloads.",
   "homepage": "https://github.com/GenericD00d/shiver-temp-share",
   "sdkVersion": 2,
-  "version": "0.0.5"
+  "version": "0.0.6"
 }
