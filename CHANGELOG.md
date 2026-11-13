@@ -17,6 +17,7 @@ Entries up to 0.0.5 were reconstructed from the commit history on 2026-11-13.
 
 ### Changed
 
+- `bun audit` runs weekly as well as on every push, in its own workflow (`.github/workflows/audit.yml`), so a new advisory shows up even when nothing is pushed.
 - The repo is now `shiver-temp-share`; the plugin id stays `temp-share`, so existing shares carry
   on.
 - The docs follow the Shiver standard ([docs/standards.md](docs/standards.md)): AGENTS.md,
