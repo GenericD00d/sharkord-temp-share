@@ -30,7 +30,7 @@ src/client/index.ts   the slot (CHAT_ACTIONS), the message component (share) and
 src/client/ui.tsx     ShareSlot, ShareCard, AdminTab
 build.ts, publish.ts  Sharkord's builder: build, and publish a release
 scripts/setup.ts      clones and links the SDK and the builder into .repos/
-scripts/check.sh      every local check; check-docs.py and check-version.py beside it
+scripts/check.sh      every local check; check-docs.py, check-version.py and check-types.sh beside it
 manifest.json         the plugin's id, version and SDK version
 ```
 

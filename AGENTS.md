@@ -37,7 +37,7 @@ The pieces:
 
 ```bash
 bun test src                    # the rules: expiry, quotas, tickets, ranges, names
-bun run check-types             # type check
+scripts/check-types.sh          # type check: fails on this repo's errors, counts the linked SDK's
 bun run build                   # writes the plugin into dist/, and into SHARKORD_PLUGINS_PATH if set
 python3 scripts/check-docs.py   # the docs follow docs/standards.md
 python3 scripts/check-version.py
