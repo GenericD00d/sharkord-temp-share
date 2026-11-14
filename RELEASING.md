@@ -44,8 +44,11 @@ Download both files from the release, then:
 
 ```bash
 sha256sum temp-share-<version>.tar.gz   # matches "checksum" in <version>.json
-tar -tzf temp-share-<version>.tar.gz    # plain files only: manifest.json, server/, client/
+tar -tvf temp-share-<version>.tar.gz    # plain files only (each line starts with -): manifest.json, server/, client/
 ```
+
+The builder writes a plain tar, despite the `.tar.gz` name, so `tar -z` refuses it; plain `tar` reads
+either.
 
 Then install it on a test server, with the manager or by hand, and share and download a file.
 
